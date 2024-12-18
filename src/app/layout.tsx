@@ -8,6 +8,8 @@ import CompanyItem from "./components/CompanyItem";
 import { useEffect, useState } from "react";
 import { Company } from "./models/Company";
 import CompanyService from "./services/CompanyService";
+import { Provider, useDispatch } from "react-redux";
+import store from "./redux/Store";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,23 +45,25 @@ export default function RootLayout({
   }, [])
 
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <header className="main-header p-3">
-          <div className="grid grid-cols-2 items-center">
-            <img src="/imgs/logo.svg" alt="Tractian" />
+    <Provider store={store}>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <header className="main-header p-3">
+            <div className="grid grid-cols-2 items-center">
+              <img src="/imgs/logo.svg" alt="Tractian" />
 
-            <nav className="text-right">
-              { companies.map((company: Company) => <CompanyItem key={company.id} company={company} onClick={(e) => {
-                e.preventDefault()
+              <nav className="text-right">
+                { companies.map((company: Company) => <CompanyItem key={company.id} company={company} onClick={(e) => {
+                  e.preventDefault()
 
-                console.log('oi');
-              }} />) }
-            </nav>
-          </div>
-        </header>
-        {children}
-      </body>
-    </html>
+                  console.log('oi');
+                }} />) }
+              </nav>
+            </div>
+          </header>
+          {children}
+        </body>
+      </html>
+    </Provider>
   );
 }

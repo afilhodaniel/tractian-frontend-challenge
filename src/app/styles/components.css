@@ -11,7 +11,7 @@
   color: var(--foreground);
 }
 .company-link:hover,
-.company-link:active {
+.company-link.active {
   background: var(--blue-500);
 }
 
