@@ -2,8 +2,12 @@
   background: #17192D;
 }
 
-.main-content {
+.main-wrapper {
   background: #fff;
+}
+
+.main-sidebar {
+  border-color: var(--gray-200);
 }
 
 .company-name small {
