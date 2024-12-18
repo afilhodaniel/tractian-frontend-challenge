@@ -1,0 +1,15 @@
+:root {
+  --blue-900: #023B78;
+  --blue-500: #2188FF;
+}
+
+.company-link {
+  transition: all ease-in-out 250ms;
+  background: var(--blue-900);
+  color: var(--foreground);
+}
+
+.company-link:hover,
+.company-link:active {
+  background: var(--blue-500);
+}
