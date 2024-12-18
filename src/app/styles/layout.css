@@ -1,3 +1,11 @@
 .main-header {
   background: #17192D;
 }
+
+.main-content {
+  background: #fff;
+}
+
+.company-name small {
+  color: var(--gray-600);
+}

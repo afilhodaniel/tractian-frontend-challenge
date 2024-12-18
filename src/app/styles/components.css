@@ -3,13 +3,26 @@
   --blue-500: #2188FF;
 }
 
+/*
+ * Company Link */
 .company-link {
   transition: all ease-in-out 250ms;
   background: var(--blue-900);
   color: var(--foreground);
 }
-
 .company-link:hover,
 .company-link:active {
   background: var(--blue-500);
+}
+
+/*
+ * Filter Item */
+.filter-item {
+  border-color: var(--gray-200);
+  color: var(--gray-600);
+}
+.filter-item.active {
+  border-color: var(--blue-500);
+  background: var(--blue-500);
+  color: var(--foreground);
 }
