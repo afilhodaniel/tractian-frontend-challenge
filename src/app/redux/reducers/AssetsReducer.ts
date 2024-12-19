@@ -1,4 +1,4 @@
-import { Asset } from "@/app/models/Asset";
+import { Asset } from "@/app/models/Resource";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface initialStateInterface {

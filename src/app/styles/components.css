@@ -26,3 +26,16 @@
   background: var(--blue-500);
   color: var(--foreground);
 }
+
+/*
+ *Tree Item */
+ .tree-item {
+  cursor: pointer;
+ }
+.tree-item.active > .tree-item-button > .tree-item-caret {
+  transform: initial;
+}
+.tree-item-caret {
+  transform: rotate(-90deg);
+  width: 16px;
+}
