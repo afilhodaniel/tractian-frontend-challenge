@@ -20,20 +20,85 @@ export default function Home() {
   const assets = useSelector((state) => state.assets.value)
 
   const [resources, setResources] = useState<Array<Resource>>([])
+  const [filtered, setFiltered] = useState<Array<Resource>>([])
 
   const [filters, setFilters] = useState<Array<Filter>>([{
-    slug: 'filter-sensor',
+    active: false,
+    slug: 'filter-sensor-energy',
     icon: 'bolt',
     label: 'Sensor de Energia'
   }, {
-    slug: 'filter-status',
+    active: false,
+    slug: 'filter-status-alert',
     icon: 'warning',
     label: 'Crítico'
   }])
 
+  const parents = (ids: Array<string>) => {
+    ids.map((id: string) => {
+      const filteredResources = resources.filter((resource: Resource) => resource.id === id)
+
+      const filteredResourcesParentIds = Array.from(new Set(filteredResources.map((resource: Resource) => {
+        if (resource.parentId) return resource.parentId
+        if (resource.locationId) return resource.locationId
+      })))
+  
+      if (filteredResourcesParentIds.length > 0) parents(filteredResourcesParentIds)
+
+      setFiltered((prevState) => {
+        // Adiciona apenas recursos únicos
+        const uniqueResources = filteredResources.filter(
+          (resource) => !prevState.some((existing) => existing.id === resource.id)
+        );
+        return [...prevState, ...uniqueResources];
+      });
+    })
+  }
+
+  const filter = () => {
+    if (!filters.some((item: Filter) => item.active)) return setFiltered(resources)
+
+    let filteredResources: Array<Resource> = []
+    const uniqueResources = new Map<string, Resource>();
+
+    if (filters.some((item: Filter) => item.active && item.slug === "filter-sensor-energy")) {
+      resources
+        .filter((resource: Resource) => resource.sensorType === "energy")
+        .forEach((resource) => {
+          uniqueResources.set(resource.id, resource); // Adiciona apenas se o ID ainda não existir
+        });
+    }
+    
+    if (filters.some((item: Filter) => item.active && item.slug === "filter-status-alert")) {
+      resources
+        .filter((resource: Resource) => resource.status === "alert")
+        .forEach((resource) => {
+          uniqueResources.set(resource.id, resource); // Adiciona apenas se o ID ainda não existir
+        });
+    }
+
+    filteredResources = Array.from(uniqueResources.values());
+
+    const filteredResourcesParentIds = Array.from(new Set(filteredResources.map((resource: Resource) => {
+      if (resource.parentId) return resource.parentId
+      if (resource.locationId) return resource.locationId
+    })))
+
+    if (filteredResourcesParentIds.length > 0) parents(filteredResourcesParentIds)
+
+    setFiltered((prevState) => [...prevState, ...filteredResources]);
+  }
+
   useEffect(() => {
     if (company) {
       setResources([])
+      setFiltered([])
+      setFilters(filters.map((item: Filter) => {
+        return {
+          ...item,
+          active: false
+        }
+      }))
 
       CompanyService.locations(company.id)
         .then((response) => {
@@ -54,7 +119,7 @@ export default function Home() {
   }, [company])
 
   useEffect(() => {
-    if (locations) {
+    if (locations.length > 0) {
       setResources((prevState) => [...prevState, ...locations.map((resource: Resource) => {
         return {
           ...resource,
@@ -65,7 +130,7 @@ export default function Home() {
   }, [locations])
   
   useEffect(() => {
-    if (assets) {
+    if (assets.length > 0) {
       setResources((prevState) => [...prevState, ...assets.map((resource: Resource) => {
         return {
           ...resource,
@@ -74,6 +139,10 @@ export default function Home() {
       })])
     }
   }, [assets])
+
+  useEffect(() => {
+    filter()
+  }, [resources, filters])
 
 
   return (
@@ -85,7 +154,17 @@ export default function Home() {
         
         { company && <div className="main-filters flex justify-end">
           { filters.map((item: Filter) => <FilterItem key={item.slug} item={item} onClick={() => {
-            console.log('oi')
+            setFiltered([])
+            setFilters(filters.map((cItem: Filter) => {
+              if (cItem.slug === item.slug) {
+                return {
+                  ...cItem,
+                  active: !cItem.active
+                }
+              }
+
+              return cItem
+            }))
           }} />) }
         </div> }
       </div>
@@ -96,10 +175,10 @@ export default function Home() {
 
       { company && <div className='mt-3 flex'>
         <aside className='main-sidebar w-2/5 border-2 rounded mr-3 p-3 max-h-screen overflow-y-scroll'>
-          { resources
+          { filtered
               .filter((pResource: Resource) => !pResource.parentId && !pResource.locationId)
               .map((pResource: Resource) =>
-                <TreeItem key={pResource.id} resource={pResource} resources={resources} />
+                <TreeItem key={pResource.id} resource={pResource} resources={filtered} />
           )}
         </aside>
 

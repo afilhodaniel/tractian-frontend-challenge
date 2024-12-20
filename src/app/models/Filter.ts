@@ -1,5 +1,6 @@
 export type Filter {
-  slug: string,
+  active: boolean,
+  slug: "filter-sensor-energy" | "filter-status-alert",
   icon: string,
   label: string,
 }

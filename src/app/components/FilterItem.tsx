@@ -9,17 +9,12 @@ type FilterItemProps = FilterItemIterface & React.ButtonHTMLAttributes<HTMLButto
 
 export default function FilterItem(props: FilterItemProps) {
 
-  const [active, setActive] = useState<boolean>(false)
-
-  const { icon, label } = props.item
+  const { active, icon, label } = props.item
 
   return (
     <button
       className={`flex items-center filter-item border-2 rounded py-1 px-2 text-sm font-semibold ml-2 ${active ? 'active' : ''}`}
-      onClickCapture={() => {
-        setActive(!active)
-      }}
-      onClick={props.onClick}
+      {...props}
     >
       <img src={`/imgs/${icon}${active ? '-active' : ''}.svg`} alt={label} />
       <span className="ml-1">{label}</span>
