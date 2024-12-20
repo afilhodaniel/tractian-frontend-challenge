@@ -22,6 +22,7 @@ export default function Home() {
   const [resources, setResources] = useState<Array<Resource>>([])
   const [filtered, setFiltered] = useState<Array<Resource>>([])
 
+  const [search, setSearch] = useState<string>('');
   const [filters, setFilters] = useState<Array<Filter>>([{
     active: false,
     slug: 'filter-sensor-energy',
@@ -60,26 +61,33 @@ export default function Home() {
   };
 
   const filter = () => {
-    if (!filters.some((filter) => filter.active)) {
+    if (!filters.some((filter: Filter) => filter.active) && !search.trim()) {
       setFiltered(resources);
       return;
     }
   
-    let filteredResources: Array<Resource> = [];
-    const activeFilters = new Set(filters.filter((filter) => filter.active).map((filter) => filter.slug));
+    let filteredResources: Array<Resource> = [...resources];
+  
+    if (search.trim()) {
+      filteredResources = filteredResources.filter((resource: Resource) =>
+        resource.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+  
+    const activeFilters = new Set(filters.filter((filter: Filter) => filter.active).map((filter) => filter.slug));
   
     if (activeFilters.has("filter-sensor-energy")) {
-      filteredResources.push(...resources.filter((resource) => resource.sensorType === "energy"));
+      filteredResources = filteredResources.filter((resource: Resource) => resource.sensorType === "energy");
     }
   
     if (activeFilters.has("filter-status-alert")) {
-      filteredResources.push(...resources.filter((resource) => resource.status === "alert"));
+      filteredResources = filteredResources.filter((resource: Resource) => resource.status === "alert");
     }
   
-    filteredResources = Array.from(new Map(filteredResources.map((resource) => [resource.id, resource])).values());
+    filteredResources = Array.from(new Map(filteredResources.map((resource: Resource) => [resource.id, resource])).values());
   
     const parentIds = findParentIds(filteredResources);
-  
+    
     if (parentIds.length > 0) parents(parentIds);
   
     setFiltered((prevState) => addUniqueResources(filteredResources, prevState));
@@ -87,6 +95,7 @@ export default function Home() {
 
   useEffect(() => {
     if (company) {
+      setSearch('')
       setResources([])
       setFiltered([])
       setFilters(filters.map((item: Filter) => {
@@ -137,8 +146,8 @@ export default function Home() {
   }, [assets])
 
   useEffect(() => {
-    filter()
-  }, [resources, filters])
+    filter();
+  }, [resources, filters, search]);
 
 
   return (
@@ -170,16 +179,31 @@ export default function Home() {
       </div> }
 
       { company && <div className='mt-3 flex'>
-        <aside className='main-sidebar w-2/5 border-2 rounded mr-3 p-3 max-h-screen overflow-y-scroll'>
-          { filtered
-              .filter((pResource: Resource) => !pResource.parentId && !pResource.locationId)
-              .map((pResource: Resource) =>
-                <TreeItem key={pResource.id} resource={pResource} resources={filtered} />
-          )}
+        <aside className='main-sidebar w-2/5 border-2 rounded mr-3 max-h-screen overflow-y-scroll'>
+          <div className="p-3 border-b-2">
+            <input
+              className='outline-none w-full'
+              type="search"
+              placeholder="Buscar por Ativo ou Local"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setFiltered([]);
+              }}
+            />
+          </div>
+          <div className="p-3">
+            { filtered
+                .filter((pResource: Resource) => !pResource.parentId && !pResource.locationId)
+                .map((pResource: Resource) =>
+                  <TreeItem key={pResource.id} resource={pResource} resources={filtered} />
+            )}
+            { filtered.length === 0 && <span>Nothing to show with selected filters</span> }
+          </div>
         </aside>
 
         <section className='main-content w-3/5'>
-          oi
+          Please, select one component
         </section>
       </div> }
     </div>
