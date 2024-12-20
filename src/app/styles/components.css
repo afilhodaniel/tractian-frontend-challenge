@@ -32,6 +32,10 @@
  .tree-item {
   cursor: pointer;
  }
+.tree-item-button.active {
+  color: var(--foreground);
+  background: var(--blue-500);
+}
 .tree-item.active > .tree-item-button > .tree-item-caret {
   transform: initial;
 }

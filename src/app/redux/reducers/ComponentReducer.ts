@@ -2,23 +2,23 @@ import { Resource } from "@/app/models/Resource";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface initialStateInterface {
-  value: Array<Resource>
+  value: Resource | null
 }
 
 const initialState: initialStateInterface = {
-  value: []
+  value: null
 }
 
-const assetsSlice = createSlice({
-  name: 'assets',
+const componentSlice = createSlice({
+  name: 'component',
   initialState: initialState,
   reducers: {
-    setAssets: (state, action: PayloadAction<Array<Resource>>) => {
+    setComponent: (state, action: PayloadAction<Resource>) => {
       state.value = action.payload
     },
   }
 })
 
-export const { setAssets } = assetsSlice.actions
+export const { setComponent } = componentSlice.actions
 
-export default assetsSlice.reducer
+export default componentSlice.reducer

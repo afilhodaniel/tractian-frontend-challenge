@@ -1,8 +1,8 @@
-import { Location } from "@/app/models/Location";
+import { Resource } from "@/app/models/Resource";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface initialStateInterface {
-  value: Array<Location>
+  value: Array<Resource>
 }
 
 const initialState: initialStateInterface = {
@@ -13,7 +13,7 @@ const locationsSlice = createSlice({
   name: 'locations',
   initialState: initialState,
   reducers: {
-    setLocations: (state, action: PayloadAction<Array<Location>>) => {
+    setLocations: (state, action: PayloadAction<Array<Resource>>) => {
       state.value = action.payload
     },
   }

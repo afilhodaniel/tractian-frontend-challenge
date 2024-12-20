@@ -10,6 +10,7 @@ import { setLocations } from './redux/reducers/LocationsReducer';
 import { setAssets } from './redux/reducers/AssetsReducer';
 import { Resource } from './models/Resource';
 import TreeItem from './components/TreeItem';
+import { setComponent } from './redux/reducers/ComponentReducer';
 
 export default function Home() {
 
@@ -18,6 +19,7 @@ export default function Home() {
   const company = useSelector((state) => state.company.value)
   const locations = useSelector((state) => state.locations.value)
   const assets = useSelector((state) => state.assets.value)
+  const component = useSelector((state) => state.component.value)
 
   const [resources, setResources] = useState<Array<Resource>>([])
   const [filtered, setFiltered] = useState<Array<Resource>>([])
@@ -95,6 +97,7 @@ export default function Home() {
 
   useEffect(() => {
     if (company) {
+      dispatch(setComponent(null))
       setSearch('')
       setResources([])
       setFiltered([])
@@ -202,8 +205,44 @@ export default function Home() {
           </div>
         </aside>
 
-        <section className='main-content w-3/5'>
-          Please, select one component
+        <section className='main-content w-3/5 border-2 rounded'>
+          { !component && <div className='flex w-full h-full items-center justify-center'>
+            <span>Please, select one component</span>
+          </div> }
+          { component && <>
+            <div className='flex p-3 border-b-2 font-bold'>
+              {component.name}
+              { component.status === "operating" && <img className="ml-1" src="/imgs/status-green.svg" /> }
+              { component.status === "alert" && <img className="ml-1" src="/imgs/status-red.svg" /> }
+              { component.sensorType === "energy" && <img className="ml-1" src="/imgs/bolt-green.svg" /> }
+            </div>
+
+            <div className='p-3'>
+              <b>Tipo de Equipamento</b>
+              <br />
+              <span>Não Informado</span>
+            </div>
+            
+            <div className='p-3'>
+              <b>Responsáveis</b>
+              <br />
+              <span>Não Informado</span>
+            </div>
+
+            <div className="grid grid-cols-2 p-3 border-t-2">
+              <div>
+                <b>Sensor</b>
+                <br />
+                <span className='flex items-center'><img className='mr-2' src="/imgs/sensor-icon.svg" />{component.gatewayId}</span>
+              </div>
+              
+              <div>
+                <b>Receptor</b>
+                <br />
+                <span className='flex items-center'><img className='mr-2' src="/imgs/receptor-icon.svg" />{component.gatewayId}</span>
+              </div>
+            </div>
+          </> }
         </section>
       </div> }
     </div>

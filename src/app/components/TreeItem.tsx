@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Resource } from "../models/Resource";
+import { useDispatch, useSelector } from "react-redux";
+import { setComponent } from "../redux/reducers/ComponentReducer";
 
 interface TreeItemInterface {
   resource: Resource,
@@ -9,6 +11,10 @@ interface TreeItemInterface {
 type TreeItemProps = TreeItemInterface
 
 export default function TreeItem(props: TreeItemProps) {
+
+  const dispatch = useDispatch()
+
+  const component = useSelector((state) => state.component.value)
 
   const { resource, resources } = props
 
@@ -20,11 +26,17 @@ export default function TreeItem(props: TreeItemProps) {
 
   return (
     <div className={`tree-item ${active ? 'active' : ''}`}>
-      <div className="tree-item-button flex items-center" onClick={() => setActive(!active)}>
+      <div className={`tree-item-button flex items-center ${component?.id == resource.id ? 'active' : ''}`} onClick={() => {
+        if (resource.kind === "component") {
+          dispatch(setComponent(resource))
+        }
+        
+        setActive(!active)
+      }}>
         <span className="tree-item-caret inline-block">
           { hasChildren() && <img src="/imgs/caret.svg" /> }
         </span>
-        <img src={`/imgs/${resource.kind}-icon.svg`} />
+        <img src={`/imgs/${resource.kind}${component?.id == resource.id ? '-white' : ''}-icon.png`} />
         <span className="ml-2">{resource.name}</span>
         { resource.status === "operating" && <img className="ml-1" src="/imgs/status-green.svg" /> }
         { resource.status === "alert" && <img className="ml-1" src="/imgs/status-red.svg" /> }
