@@ -34,60 +34,56 @@ export default function Home() {
     label: 'Crítico'
   }])
 
+  const findParentIds = (resources: Array<Resource>): Array<string> => {
+    return Array.from(
+      new Set(
+        resources.map((resource) => resource.parentId || resource.locationId).filter(Boolean)
+      )
+    ) as string[];
+  };
+
+  const addUniqueResources = (newResources: Array<Resource>, existingResources: Array<Resource>): Array<Resource> => {
+    const existingIds = new Set(existingResources.map((resource) => resource.id));
+    return [...existingResources, ...newResources.filter((resource) => !existingIds.has(resource.id))];
+  };
+
   const parents = (ids: Array<string>) => {
-    ids.map((id: string) => {
-      const filteredResources = resources.filter((resource: Resource) => resource.id === id)
-
-      const filteredResourcesParentIds = Array.from(new Set(filteredResources.map((resource: Resource) => {
-        if (resource.parentId) return resource.parentId
-        if (resource.locationId) return resource.locationId
-      })))
+    ids.forEach((id) => {
+      const filteredResources = resources.filter((resource) => resource.id === id);
   
-      if (filteredResourcesParentIds.length > 0) parents(filteredResourcesParentIds)
-
-      setFiltered((prevState) => {
-        // Adiciona apenas recursos únicos
-        const uniqueResources = filteredResources.filter(
-          (resource) => !prevState.some((existing) => existing.id === resource.id)
-        );
-        return [...prevState, ...uniqueResources];
-      });
-    })
-  }
+      const parentIds = findParentIds(filteredResources);
+  
+      if (parentIds.length > 0) parents(parentIds);
+  
+      setFiltered((prevState) => addUniqueResources(filteredResources, prevState));
+    });
+  };
 
   const filter = () => {
-    if (!filters.some((item: Filter) => item.active)) return setFiltered(resources)
-
-    let filteredResources: Array<Resource> = []
-    const uniqueResources = new Map<string, Resource>();
-
-    if (filters.some((item: Filter) => item.active && item.slug === "filter-sensor-energy")) {
-      resources
-        .filter((resource: Resource) => resource.sensorType === "energy")
-        .forEach((resource) => {
-          uniqueResources.set(resource.id, resource); // Adiciona apenas se o ID ainda não existir
-        });
+    if (!filters.some((filter) => filter.active)) {
+      setFiltered(resources);
+      return;
     }
-    
-    if (filters.some((item: Filter) => item.active && item.slug === "filter-status-alert")) {
-      resources
-        .filter((resource: Resource) => resource.status === "alert")
-        .forEach((resource) => {
-          uniqueResources.set(resource.id, resource); // Adiciona apenas se o ID ainda não existir
-        });
+  
+    let filteredResources: Array<Resource> = [];
+    const activeFilters = new Set(filters.filter((filter) => filter.active).map((filter) => filter.slug));
+  
+    if (activeFilters.has("filter-sensor-energy")) {
+      filteredResources.push(...resources.filter((resource) => resource.sensorType === "energy"));
     }
-
-    filteredResources = Array.from(uniqueResources.values());
-
-    const filteredResourcesParentIds = Array.from(new Set(filteredResources.map((resource: Resource) => {
-      if (resource.parentId) return resource.parentId
-      if (resource.locationId) return resource.locationId
-    })))
-
-    if (filteredResourcesParentIds.length > 0) parents(filteredResourcesParentIds)
-
-    setFiltered((prevState) => [...prevState, ...filteredResources]);
-  }
+  
+    if (activeFilters.has("filter-status-alert")) {
+      filteredResources.push(...resources.filter((resource) => resource.status === "alert"));
+    }
+  
+    filteredResources = Array.from(new Map(filteredResources.map((resource) => [resource.id, resource])).values());
+  
+    const parentIds = findParentIds(filteredResources);
+  
+    if (parentIds.length > 0) parents(parentIds);
+  
+    setFiltered((prevState) => addUniqueResources(filteredResources, prevState));
+  };
 
   useEffect(() => {
     if (company) {
